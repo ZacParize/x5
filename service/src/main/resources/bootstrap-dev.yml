@@ -1,0 +1,39 @@
+rudata:
+  url: https://dh2.efir-net.ru:443/v2
+  login: usr
+  password: pwd
+
+discovery:
+  host: localhost
+  port: 8761
+
+fluent:
+  host: localhost
+  port: 24224
+
+mongo:
+  host: localhost
+  port: 27017
+  database: admin
+  user: admin
+  password: admin
+
+config:
+  host: config-service.local
+  port: 8008
+
+spring:
+  application:
+    port: 8075
+  profiles:
+    active: dev
+  cloud:
+    config:
+      enabled: false
+      uri: http://${config.host:config-service.local}:${config.port:8888}
+      failFast: true
+      overrideSystemProperties: true
+      overrideNone: false
+      discovery:
+        enabled: false
+        service-id: config-server

@@ -1,0 +1,45 @@
+rudata:
+  url: ${rudata_url}
+  login: ${rudata_login}
+  password: ${rudata_password}
+
+discovery:
+  host: ${discovery_host}
+  port: ${discovery_port}
+
+fluent:
+  host: ${fluent_host}
+  port: ${fluent_port}
+
+mongo:
+  host: ${mongo_host}
+  port: ${mongo_port}
+  database: ${mongo_database}
+  user: ${mongo_user}
+  password: ${mongo_password}
+
+config:
+  host: ${config_host}
+  port: ${config_port}
+
+spring:
+  application:
+    port: ${application_port}
+  profiles:
+    active: default
+  cloud:
+    inetutils:
+      preferred-networks:
+        - 10.0
+      ignored-interfaces:
+        - eth2
+        - eth2@*
+    config:
+      enabled: false
+      uri: http://${config.host:config-service.local}:${config.port:8888}
+      failFast: true
+      overrideSystemProperties: true
+      overrideNone: false
+      discovery:
+        enabled: false
+        service-id: config-server

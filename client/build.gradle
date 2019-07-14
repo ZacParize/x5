@@ -1,0 +1,116 @@
+/*
+ * build.gradle
+ *
+ * Copyright 2017-2018 BCS-Technologies. All Rights Reserved.
+ *
+ * This software is the proprietary information of BCS-Technologies.
+ * Use is subject to license terms.
+ */
+
+archivesBaseName = 'bm-catalog-of-instruments-rudata-client'
+group = parent.group
+version = parent.version
+
+dependencyManagement {
+    imports {
+        mavenBom "com.bcs.bm.common:bm-dependencies:$ver.bmDependencies"
+    }
+    resolutionStrategy {
+        cacheDynamicVersionsFor 5, 'minutes'
+        cacheChangingModulesFor 0, 'minutes'
+    }
+}
+
+dependencies {
+
+    compileOnly "org.projectlombok:lombok"
+
+    compile "javax.validation:validation-api",
+            "javax.inject:javax.inject:1",
+            "com.google.api.grpc:proto-google-common-protos",
+            "com.google.protobuf:protoc",
+            "com.google.protobuf:protobuf-java"
+
+    compile "io.grpc:grpc-all",
+            "io.grpc:grpc-stub",
+            "io.grpc:grpc-netty",
+            "io.grpc:grpc-protobuf",
+            "io.netty:netty-all"
+
+    compile "org.springframework.boot:spring-boot-starter-parent",
+            "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+
+    /*testCompileOnly "org.projectlombok:lombok"
+
+    testCompile "org.junit.jupiter:junit-jupiter-api",
+                "org.junit.jupiter:junit-jupiter-params",
+                "com.bcs.bm.common:bm-test"
+
+    testRuntime "org.slf4j:slf4j-simple",
+                "org.junit.jupiter:junit-jupiter-engine"*/
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId rootProject.group
+            artifactId archivesBaseName
+            version rootProject.version
+
+            from components.java
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {
+                outputSubDir = 'java'
+            }
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src"
+}
+
+//allow to put resources next to java code
+sourceSets {
+    main {
+        proto {
+            // In addition to the default 'src/main/proto'
+            srcDir 'src/main/protobuf'
+            srcDir 'src/main/protocolbuffers'
+            // In addition to the default '**/*.proto' (use with caution).
+            // Using an extension other than 'proto' is NOT recommended,
+            // because when proto files are published along with class files, we can
+            // only tell the type of a file from its extension.
+            include '**/*.protodevel'
+        }
+        java {
+            srcDirs =  ['src/main/java']
+            //...
+        }
+    }
+    test {
+        proto {
+            // In addition to the default 'src/test/proto'
+            srcDir 'src/test/protocolbuffers'
+        }
+        resources {
+            srcDirs += test.java.srcDirs
+            exclude '**/*.java'
+        }
+    }
+}

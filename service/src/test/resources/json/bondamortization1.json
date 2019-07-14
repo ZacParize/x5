@@ -1,0 +1,14 @@
+{
+    "idfintool" : 84451,
+    "idtranche" : 4,
+    "mtydate" : "2013-11-25T00:00:00",
+    "daysfromdist" : 362,
+    "mtypart" : 4.508,
+    "payperbond" : 45.08,
+    "paypermarket" : 143129005.8136,
+    "mtytype" : "Частичное досрочное погашение",
+    "ratedate" : "2013-11-18T00:00:00",
+    "fixdate" : "2013-11-25T00:00:00",
+    "paydate" : "2013-11-25T00:00:00",
+    "updatedate" : null
+}

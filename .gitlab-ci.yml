@@ -1,0 +1,303 @@
+image: $CI_REGISTRY/bm/devops/images/buildimage:jdk11
+before_script:
+  - export GRADLE_OPTS=-Dorg.gradle.daemon=false
+  - export GRADLE_USER_HOME=$PWD/.gradle
+
+variables:
+  HTTP_PROXY: http://s-proxy-04-g.global.bcs:8080
+  HTTPS_PROXY: http://s-proxy-04-g.global.bcs:8080
+  NO_PROXY: s-t-mic-kubeapi.t-global.bcs,gitlab.gitlab.svc.cluster.local,$CI_REGISTRY, artifactory.gitlab.bcs.ru
+  GRADLE_CLI_OPTS: -i -s --console=plain --refresh-dependencies -DfailFast=true -Dfile.encoding=UTF-8 -Djava.awt.headless=true -DbuildRev=$CI_BUILD_REF -Dbranch=$CI_BUILD_REF_NAME -DbuildNumber=${CI_PIPELINE_ID}_
+  SONARQUBE_OPTS: -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  DOCKER_BUILD_ARGS: --build-arg CI_REGISTRY=$CI_REGISTRY
+
+# Зависимости микросервиса
+  IMG_TAG: --set global.imageTag=$CI_COMMIT_REF_NAME
+  DISCOVERY: --set global.ingress.prefix=$CI_PROJECT_NAME
+  TO_TRUE: --set tags.rudata-proxy=true --set tags.readyapi=true --set tags.rudata-mongodb=true
+
+
+stages:
+  - commitcheck
+  - build
+  - deploy
+  - cleanup
+  - install
+  - SmokeTest
+  - RegressTest
+  - IntegrationTest
+  - publish
+  - autoremove
+
+commit_message_wrong_format:
+  stage: commitcheck
+  except:
+    refs:
+      - master
+      - dev
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /^JBOT-\d{1,6} \[(MINOR)|(MAJOR)|(FEATURE)\]:.*[^.]$/
+  script: |
+      echo $(git log -1 --pretty=%B)
+      exit 1
+
+build:
+  stage: build
+  script: |
+    mkdir -p /root/.docker
+    echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /root/.docker/config.json
+    gradle build $GRADLE_CLI_OPTS
+  services:
+    - name: docker:dind
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+  artifacts:
+    paths:
+      - service/build/libs/*.jar
+      - client/build/libs/*.jar
+    expire_in: 10 minutes
+
+deploy:
+  stage: deploy
+  only:
+    - master
+    - test
+    - dev
+  services:
+    - name: docker:dind
+  script: |
+    docker -H 127.0.0.1 build -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME $DOCKER_BUILD_ARGS .
+    docker -H 127.0.0.1 login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    docker -H 127.0.0.1 push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+
+
+# installRelease:
+#  stage: install
+#  only:
+#     - master
+#  variables:
+#    GIT_STRATEGY: none
+#  environment:
+#   name: testing/$CI_COMMIT_REF_NAME
+#   url: https://oc.tusvc.bcs.ru/
+#   on_stop: kill_success
+#  before_script:
+#   - mkdir -p /etc/deploy
+#   - KUBE_CONFIG=${K8S_TEST}
+#   - echo ${KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+#   - helm init --client-only
+#   - kubectl version
+#   - helm version
+#   - echo $CI_PROJECT_NAMESPACE
+#   - echo $CI_COMMIT_REF_SLUG
+
+#  script:
+#   - CHARTS_TOKEN=$(echo ${CHART_TOKEN} | base64 -d)
+#   - echo $PWD
+#   - git clone --single-branch -b test https://${CHARTS_TOKEN}@gitlab.gitlab.bcs.ru/bm/system/charts-bm.git && cp -r $PWD/charts-bm/* $PWD && ls $PWD/charts-bm;
+#   - sed -i 's/true/false/g' values-test.yaml
+#   - CHART_PATH=$(dirname $(find . -mindepth 2 -maxdepth 2 -name Chart.yaml | head -1))
+#   - CHART_NAME=$(basename "$CHART_PATH")
+#   - HELMPID=$!
+#   - trap "rc=\$?; kill $HELMPID; echo Done with exit status \$rc; exit \$rc" EXIT
+#   - sleep 1
+#   - ns="bm-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG"
+#   - opts="-f values-test.yaml $IMG_TAG $TO_TRUE --set global.issue=-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG --set global.regsecret=${REG_SECRET} $DISCOVERY"
+#   - if [ -f RELEASE ]; then release=$(head -1 RELEASE)-$CI_ENVIRONMENT_SLUG; fi
+#   - if [ -z "$release" ]; then release="$CHART_NAME-$CI_ENVIRONMENT_SLUG" ; fi
+#   - helm_release=$(helm list --all --deployed -m 100 | awk '$1 == "'"$release"'" {print}')
+#   - echo CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME
+#   - echo $ns
+#   - if [ -z "$helm_release" ]; then helm install $opts --name $release --namespace $ns bm/; else helm upgrade --recreate-pods $opts $release bm/; fi
+#   - while [ `kubectl get pod -n $ns | awk '{print $2}' | grep -c 0/1` -ge 1 ]; do sleep 5; echo "WAITING FOR RUNNING "$(kubectl get pod -n $ns | awk '{print $2}' | grep -c 0/1)" PODS."; done
+#   - sleep 60
+# #  when: on_success
+
+# SmokeTest:
+#  stage: SmokeTest
+#  only:
+#   - master
+#  variables:
+#    GIT_STRATEGY: none
+#  environment:
+#   name: testing/$CI_COMMIT_REF_NAME
+#   url: https://oc.tusvc.bcs.ru/
+#   on_stop: kill_success
+#  before_script:
+#   - mkdir -p /etc/deploy
+#   - KUBE_CONFIG=${K8S_TEST}
+#   - echo ${KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+#   - kubectl version
+#   - ns="bm-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG"
+#   - echo $CI_ENVIRONMENT_SLUG
+#   - svc=$(kubectl get services -n ${ns} | grep readyapi | awk '{print $1}')
+#   - pod=$(kubectl get pod -n ${ns} | grep readyapi | awk '{print $1}')
+#   - echo "Getting Test Plan For" $CI_PROJECT_NAME
+#   - git clone https://gitlab+deploy-token-21:gkmsSzANSCWC6Apzb9dt@gitlab.gitlab.bcs.ru/bm/test/qa-catalog-of-instruments-rudata-test.git .
+#   - export date=$(TZ=UTC-7 date +'%d.%m.%Y,%H:%M');
+#   - export time=$(TZ=UTC-7 date +'%H:%M');
+#   - kubectl cp -n ${ns} RuData/. ${pod}:/tmp && kubectl exec -it -n ${ns} ${pod} -- bash -c "cp -r /tmp/tmp/* /tmp/"
+#   - echo $MM | base64 -d > report.sh && chmod +x report.sh
+#   - sed -i "s#SmokeLog#\"${CI_JOB_URL}/raw\"#" "report.sh"
+#   - sed -i "s#PDFReport#\"https://bmcloud.tusvc.bcs.ru/index.php/apps/files/?dir=/PDFReports/$(date '+%d-%b-%Y')/RuData\"#" "report.sh"
+
+#  script:
+#   - echo $PWD
+#   - echo "Starting Smoke Tests For" $CI_PROJECT_NAME
+#   - curl --noproxy '*' --form "project=@/$PWD/RuData/RuData-readyapi-project.xml" \--form "option=-f/tmp" \--form "option=-RTestSuite Report" \--form "option=-Emaster" \--form "option=-j" \--form "suite=Smoke Test Suite" \http://${svc}.${ns}.svc.cluster.local:3000/
+#   - mkdir -p reports
+#   - sleep 1
+#   - kubectl cp -n ${ns} ${pod}:/tmp/report.xml reports/sreport.xml
+#   - kubectl cp -n ${ns} "${pod}:/tmp/Smoke-Test-Suite/TestSuite Report.pdf" SmokeTestResult.pdf || true
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -X MKCOL "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')"
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -X MKCOL "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')/RuData"
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -T SmokeTestResult.pdf "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')/RuData/SmokeTestResult_${time}.pdf" || true
+#   - kubectl exec -it -n ${ns} ${pod} -- bash -c "rm -rf /tmp/*"
+#   - unsuccess=`cat reports/sreport.xml | grep -c FAIL` && export Smoke=$unsuccess && echo $Smoke
+#   - |
+#     failed=$(grep -qc "Status: FAIL" reports/sreport.xml || true)
+#     echo "!------------------------------------------------------------!"
+#     echo "${failed} CASES FAILED"
+#     echo "!------------------------------------------------------------!"
+#     if [ $unsuccess -ge 1 ]; then color="FF0000"; else color="00FF00"; fi
+#   - if [ `grep -c "FAIL" reports/sreport.xml` -eq 0 ]; then exit 0; else ./report.sh && exit 1; fi
+#  when: on_success
+#  dependencies: []
+#  artifacts:
+#    paths:
+#      - reports/*.xml
+#      - report.sh
+#    expire_in: 15 mins
+#    reports:
+#      junit: reports/sreport.xml
+
+# RegressTest:
+#  dependencies:
+#   - SmokeTest
+#  stage: RegressTest
+#  only:
+#   - master
+#  variables:
+#    GIT_STRATEGY: none
+#  environment:
+#   name: testing/$CI_COMMIT_REF_NAME
+#   url: https://oc.tusvc.bcs.ru/
+#   on_stop: kill_success
+#  before_script:
+#   - mkdir -p /etc/deploy
+#   - mkdir -p test
+#   - KUBE_CONFIG=${K8S_TEST}
+#   - echo ${KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+#   - kubectl version
+#   - ns="bm-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG"
+#   - echo $CI_ENVIRONMENT_SLUG
+#   - svc=$(kubectl get services -n ${ns} | grep readyapi | awk '{print $1}')
+#   - pod=$(kubectl get pod -n ${ns} | grep readyapi | awk '{print $1}')
+#   - echo "Getting Test Plan For" $CI_PROJECT_NAME
+#   - git clone https://gitlab+deploy-token-21:gkmsSzANSCWC6Apzb9dt@gitlab.gitlab.bcs.ru/bm/test/qa-catalog-of-instruments-rudata-test.git test/
+#   - TZ=UTC-7 date +'%d.%m.%Y,%H:%M'
+#   - export date=$(TZ=UTC-7 date +'%d.%m.%Y,%H:%M')
+#   - kubectl cp -n ${ns} test/RuData/. ${pod}:/tmp && kubectl exec -it -n ${ns} ${pod} -- bash -c "cp -r /tmp/tmp/* /tmp/"
+#   - export RegressLog=$CI_JOB_URL/raw
+
+#  script:
+#   - echo $PWD
+#   - echo "Starting Regress Tests For" $CI_PROJECT_NAME
+#   - ls
+#   - ls test
+#   - curl --noproxy '*' --form "project=@/$PWD/test/RuData/RuData-readyapi-project.xml" \--form "option=-f/tmp" \--form "option=-RTestSuite Report" \--form "option=-Emaster" \--form "option=-j" \--form "suite=Regression Test Suite" \http://${svc}.${ns}.svc.cluster.local:3000/
+#   - mkdir -p reports
+#   - sleep 1
+#   - kubectl cp -n ${ns} ${pod}:/tmp/report.xml reports/rreport.xml
+#   - kubectl cp -n ${ns} "${pod}:/tmp/Regression-Test-Suite/TestSuite Report.pdf" RegressionTestResult.pdf || true
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -X MKCOL "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')"
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -X MKCOL "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')/RuData"
+#   - curl -u revers:VWLVY-YEPAQ-EWZYY-WXFMT -T RegressionTestResult.pdf "https://bmcloud.tusvc.bcs.ru/remote.php/dav/files/revers/PDFReports/$(date '+%d-%b-%Y')/RuData/RegressionTestResult_${time}.pdf" || true
+#   - kubectl exec -it -n ${ns} ${pod} -- bash -c "rm -rf /tmp/*"
+#   - runsuccess=`cat reports/rreport.xml | grep -c FAIL` && echo $runsuccess
+#   - export Regress=$runsuccess
+#   - sunsuccess=`cat reports/sreport.xml | grep -c FAIL` && echo $sunsuccess
+#   - export Smoke=$sunsuccess
+#   - |
+#     failed=$(grep -qc "Status: FAIL" reports/rreport.xml || true)
+#     echo "!------------------------------------------------------------!"
+#     echo "${failed} CASES FAILED"
+#     echo "!------------------------------------------------------------!"
+#     if [ $unsuccess -ge 1 ]; then color="FF0000"; else color="00FF00"; fi
+#   - if [ `grep -c "FAIL" reports/rreport.xml` -eq 0 ]; then ./report.sh && exit 0; else ./report.sh && exit 1; fi
+#  when: on_success
+#  artifacts:
+#    reports:
+#      junit: reports/rreport.xml
+
+
+# kill_success:
+#  stage: autoremove
+#  only:
+#    - master
+#  variables:
+#    GIT_STRATEGY: none
+#  environment:
+#    name: testing/$CI_COMMIT_REF_NAME
+#    action: stop
+#  before_script:
+#   - mkdir -p /etc/deploy
+#   - KUBE_CONFIG=${K8S_TEST}
+#   - CONTEXT=staging
+#   - CLUSTER=test
+#   - echo ${KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+#   - helm init --client-only
+#   - release="bm-$CI_ENVIRONMENT_SLUG"
+
+#  script:
+#   - helm delete $release || true
+#   - helm delete --purge $release || true
+#   - kubectl delete namespace bm-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG
+#   #- echo "Waiting complete delete "
+#   #- while
+#   #- echo "All pods deleted!""
+#  when: delayed
+#  start_in: 5 minutes
+#  dependencies: []
+
+# kill_fail:
+#  stage: autoremove
+#  only:
+#    - master
+#  variables:
+#    GIT_STRATEGY: none
+#  environment:
+#    name: testing/$CI_COMMIT_REF_NAME
+#    action: stop
+#  before_script:
+#   - mkdir -p /etc/deploy
+#   - KUBE_CONFIG=${K8S_TEST}
+#   - CONTEXT=staging
+#   - CLUSTER=test
+#   - echo ${KUBE_CONFIG} | base64 -d > ${KUBECONFIG}
+#   - helm init --client-only
+#   - release="bm-$CI_ENVIRONMENT_SLUG"
+
+#  script:
+#   - sleep 120
+#   - helm delete $release || true
+#   - helm delete --purge $release || true
+#   - kubectl delete namespace bm-$CI_PROJECT_NAME-$CI_ENVIRONMENT_SLUG
+#   #- echo "Waiting complete delete "
+#   #- while
+#   #- echo "All pods deleted!""
+#  when: on_failure
+#  dependencies: []
+
+publish_version:
+ stage: publish
+ only:
+   - master
+   - test
+ script: |
+   gradle :service:generateVersion $GRADLE_CLI_OPTS
+   VERSION=$(cat version.txt)
+   echo "CURRENT VERSION IS $VERSION"
+   gradle publish $GRADLE_CLI_OPTS
+ dependencies:
+  - build

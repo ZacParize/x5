@@ -1,0 +1,731 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+option java_multiple_files = true;
+option java_package = "com.bcs.bm.catalog_of_instruments_rudata.client.grpc";
+option objc_class_prefix = "";
+
+message Emitent {
+    int64 fininstid = 1;
+    string shortname_rus = 2;
+    string shortname_eng = 3;
+    string inn = 4;
+    string okpo = 5;
+    string ogrn = 6;
+    string code = 7;
+    string sector = 8;
+    string legal_address = 9;
+    string phone = 10;
+    string www = 11;
+    int64 update_date = 12;
+    string fullname_rus_nrd = 13;
+    string fullname_eng_nrd = 14;
+    string shortname_rus_nrd = 15;
+    string shortname_eng_nrd = 16;
+    string company_type_short_name = 17;
+    string state_reg_num = 18;
+    google.protobuf.Int64Value state_reg_date = 19;
+    string state_reg_name = 20;
+    google.protobuf.Int64Value egrul_date = 21;
+    string egrul_organ_name = 22;
+    string country = 23;
+    string lei_code = 24;
+    string bik = 25;
+    string fax = 26;
+    string e_mail = 27;
+    string credit_cmp = 28;
+    string is_bank_4_non_resident = 29;
+    string swift = 30;
+    google.protobuf.Int32Value country_oksm = 31;
+    string country_name_rus = 32;
+    string country_name_eng = 33;
+    string region_inn = 34;
+    string region_soato = 35;
+    string region_name = 36;
+    string fullname_rus = 37;
+    google.protobuf.Int64Value sparkid = 38;
+    string br_fcsm_reg_code = 39;
+    google.protobuf.DoubleValue capital = 40;
+    string capital_unit = 41;
+    string okved = 42;
+    string oecd_lvl = 43;
+    string oktmo = 44;
+    string okato = 45;
+    string post_address = 46;
+    string okopf = 47;
+    string okogu = 48;
+    google.protobuf.Int32Value have_rating = 49;
+    google.protobuf.Int32Value have_risk = 50;
+    google.protobuf.Int32Value is_finorg = 51;
+    google.protobuf.Int32Value is_control_by_finorg = 52;
+    google.protobuf.Int32Value is_gov_or_cb = 53;
+    google.protobuf.Int32Value on_behalf_of_state = 54;
+    google.protobuf.Int32Value is_subjectrf = 55;
+    google.protobuf.Int32Value is_cis_reg = 56;
+    string issuer_nrd = 57;
+    string tin = 58;
+    string kpp = 59;
+    string state_reg_number = 60;
+    google.protobuf.Int64Value market_id_nrd = 61;
+    string market_name_rus_nrd = 62;
+    string market_name_eng_nrd = 63;
+    string sp_rx_entity_id = 64;
+    string sp_shortname = 65;
+    string mds_shortname = 66;
+    string mds_org_id = 67;
+    string fch_id = 68;
+    string fch_shortname = 69;
+    google.protobuf.Int32Value is_monopoly = 70;
+    google.protobuf.Int32Value is_strategic = 71;
+    string ifo_list = 72;
+    google.protobuf.DoubleValue isregion = 73;
+    google.protobuf.Int64Value id_emitent = 74;
+    string sic = 75;
+    string sector4212u = 76;
+    string sna2008 = 77;
+}
+
+message Security {
+    int64 fintoolid = 1;
+    int64 idFintool = 2;
+    google.protobuf.Int64Value fininstid = 3;
+    int64 updateDate = 4;
+    google.protobuf.Int64Value importTime = 5;
+    string  borrowerinn = 6;
+    string borrowername = 7;
+    string borrowersector = 8;
+    google.protobuf.Int64Value borroweruid = 9;
+    string cfi = 10;
+    string couponRate = 11;
+    google.protobuf.DoubleValue couponsPerYear = 12;
+    string emitentShortnameRus = 13;
+    google.protobuf.Int64Value endmtyDate = 14;
+    google.protobuf.DoubleValue facevalue = 15;
+    string facevalueCurrency = 16;
+    string fintooltype = 17;
+    string fullnameRus = 18;
+    string inn = 19;
+    string isin = 20;
+    google.protobuf.DoubleValue issueVol = 21;
+    string nsdService = 22;
+    string ogrn = 23;
+    string okpo = 24;
+    google.protobuf.DoubleValue onQuatro = 25;
+    string quatroId = 26;
+    string regCode = 27;
+    string sector = 28;
+    string securitykind = 29;
+    string securitytype = 30;
+    string shortnameRus = 31;
+    string statusName = 32;
+    int32 subType = 33;
+    int32 type = 34;
+    google.protobuf.Int64Value idemitent = 35;
+    string nrdcode = 36;
+    string id_iss = 37;
+}
+
+message Int64Keys {
+    map <string, google.protobuf.Int64Value> keys = 1;
+}
+
+message StringKeys {
+    map <string, string> keys = 1;
+}
+
+message InfoEmitentsRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message InfoEmitentsResponse {
+    string reqId = 1;
+    repeated Emitent emitents = 2;
+}
+
+message SubscribeEmitentsRequest {
+    int64 update_date = 1;
+}
+
+message InfoSecuritiesRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter= 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message InfoSecuritiesResponse {
+    string reqId = 1;
+    repeated Security securities = 2;
+}
+
+message SubscribeSecuritiesRequest {
+    int64 update_date = 1;
+}
+
+message InfoFintoolReferenceDataRequest {
+    string reqId = 1;
+    repeated StringKeys idFilter= 2;
+    int64 update_date = 3;
+}
+
+message InfoFintoolReferenceDataResponse {
+    string reqId = 1;
+    repeated FintoolReferenceData fintoolReferenceData = 2;
+}
+
+message SubscribeFintoolReferenceDataRequest {
+    int64 update_date = 1;
+}
+
+message FintoolReferenceData {
+    int64 fintoolid = 1;
+    string fullname = 2;
+    string fullname_nrd = 3;
+    string isin144a = 4;
+    string isincode = 5;
+    string nickname = 6;
+    string nrdcode = 7;
+    string issuenumber = 8;
+    string bondseries = 9;
+    int64 progfintoolid = 10;
+    string regcode = 11;
+    string regcode_nrd = 12;
+    string regdate = 13;
+    string regdate_nrd = 14;
+    string regorg = 15;
+    string regorg_nrd = 16;
+    string rpregorg_nrd = 17;
+    string rpstate_nrd = 18;
+    google.protobuf.DoubleValue amortisedmty = 19;
+    string basis = 20;
+    string basis_nrd = 21;
+    string base_month = 22;
+    string base_year = 23;
+    google.protobuf.Int32Value timebasis = 24;
+    string bondstructuralpar = 25;
+    string cfi = 26;
+    string coupontype = 27;
+    string fintooltype = 28;
+    string guaranteeamount = 29;
+    string guaranteetype = 30;
+    google.protobuf.DoubleValue haveoffer = 31;
+    google.protobuf.DoubleValue isconvertible = 32;
+    string isguaranteed = 33;
+    string maturitygroup = 34;
+    string securitization = 35;
+    google.protobuf.DoubleValue accruedintcalctype = 36;
+    string country = 37;
+    int64 couponperyear = 38;
+    int64 coupon_period_base_id = 39;
+    int64 cp_type_id = 40;
+    string coupontypename_NRD = 41;
+    string faceftname = 42;
+    string faceftname_nrd = 43;
+    google.protobuf.DoubleValue facevalue = 44;
+    string facevalue_nrd = 45;
+    google.protobuf.DoubleValue currentfacevalue_nrd = 46;
+    google.protobuf.DoubleValue guarantval = 47;
+    google.protobuf.DoubleValue havedefault = 48;
+    int64 numcoupons = 49;
+    int64 numcoupons_NRD = 50;
+    string status = 51;
+    google.protobuf.DoubleValue sumissueval = 52;
+    google.protobuf.DoubleValue sumissuevol = 53;
+    string sumissuevol_nrd = 54;
+    google.protobuf.DoubleValue summarketval = 55;
+    google.protobuf.DoubleValue summarketvol = 56;
+    google.protobuf.DoubleValue summarketvol_nrd = 57;
+    string borrowername = 58;
+    string borrowerokpo = 59;
+    string borrowersector = 60;
+    int64 borroweruid = 61;
+    int64 borrowerinn = 62;
+    string issuername = 63;
+    string issuername_NRD = 64;
+    string issuerokpo = 65;
+    string issuersector = 66;
+    int64 issueruid = 67;
+    int64 issuerinn = 68;
+    string assetssector = 69;
+    int32 numguarantors = 70;
+    string begdistdate = 71;
+    string begdistdate_nrd = 72;
+    string begmtydate = 73;
+    int64 daysall = 74;
+    int64 daysall_nrd = 75;
+    string enddistdate = 76;
+    string enddistdate_nrd = 77;
+    string endmtydate = 78;
+    string endmtydate_nrd = 79;
+    int32 privatedist = 80;
+    string regdistdate = 81;
+    string regdistdate_nrd = 82;
+    google.protobuf.Int32Value islombardcbr_nrd = 83;
+    google.protobuf.Int32Value isqualified_nrd = 84;
+    string acc_open_date_nrd = 85;
+    string cmp_code_nsd_issuer_nrd = 86;
+    string cmp_code_nsd_managing_nrd = 87;
+    string company_state_mn = 88;
+    string company_state_name_nrd = 89;
+    string depositary_nrd = 90;
+    string dr_category_mn = 91;
+    string dr_category_name_en_nrd = 92;
+    string dr_category_name_nrd	= 93;
+    google.protobuf.DoubleValue drqty = 94;
+    google.protobuf.DoubleValue shqty = 95;
+    string facialacc_nrd = 96;
+    string firstcoupondate_nrd = 97;
+    google.protobuf.Int32Value formarketbonds_nrd = 98;
+    google.protobuf.Int32Value fraction_nrd = 99;
+    string isincodebase_nrd	= 100;
+    string securitytype	= 101;
+    string securitykind	= 102;
+    string micexlist_nrd = 103;
+    google.protobuf.DoubleValue minlot_nrd = 104;
+    string nrdcompcode = 105;
+    int64 placement_type_id	= 106;
+    string placementtype_nrd = 107;
+    string placeprice_nrd = 108;
+    string planmtydate_nrd = 109;
+    int64 rate_type_id = 110;
+    string ratetypenameeng_nrd = 111;
+    string ratetypenamerus_nrd = 112;
+    string registrar_nrd = 113;
+    string registraracctype_nrd = 114;
+    string registraracctypedate_nrd	= 115;
+    int64 sec_form_id = 116;
+    int64 sec_state_id = 117;
+    string sec_type_br_code	= 118;
+    int64 sec_type_id = 119;
+    string secformnameeng_nrd = 120;
+    string secformnamerus_nrd = 121;
+    string secstateeng_nrd = 122;
+    string secstaterus_nrd = 123;
+    string sectypenamebr_nrd = 124;
+    string sectypenameeng_nrd = 125;
+    string sectypenamerus_nrd = 126;
+    int64 share_category_id	= 127;
+    string share_category_name_en_nrd = 128;
+    string share_category_name_nrd = 129;
+    string specialized_depo_nrd = 130;
+    google.protobuf.DoubleValue summarketvolorig_nrd = 131;
+    google.protobuf.Int64Value update_time = 132;
+    string isregion = 133;
+    string nsd_service = 134;
+    string raterevisionsperyear = 135;
+    string floatratename = 136;
+    string issubordinated = 137;
+    google.protobuf.Int64Value update_date = 138;
+    google.protobuf.Int64Value importtime = 139;
+}
+
+message BondOffersRequest {
+    string reqId = 1;
+    repeated int64 idFilters = 2;
+    int64 update_date = 3;
+}
+
+message BondOffersResponse {
+    string reqId = 1;
+    repeated BondOffers bondOffers = 2;
+}
+
+message SubscribeBondOffersRequest {
+    int64 update_date = 1;
+}
+
+message BondOffers {
+    int64 id_fintool = 1;
+    int64 id_offer = 2;
+    string beg_order = 3;
+    string end_order = 4;
+    string offer_date = 5;
+    string end_offer_date = 6;
+    int64 days_from_dist = 7;
+    string rate_date = 8;
+    string operation_type = 9;
+    google.protobuf.DoubleValue buy_back_price = 10;
+    google.protobuf.DoubleValue buy_back_vol = 11;
+    int64 update_date = 12;
+    int64 buy_back_limit_vol = 13;
+    int64 buy_back_bid_vol = 14;
+    google.protobuf.DoubleValue buy_back_bid_ratio = 15;
+}
+
+message BondCouponsRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message BondCouponsResponse {
+    string reqId = 1;
+    repeated BondCoupons bondCoupons = 2;
+}
+
+message SubscribeBondCouponsRequest {
+    int64 update_date = 1;
+}
+
+message BondCoupons {
+    int64 id_fintool = 1;
+    int64 id_coupon = 2;
+    string begin_period = 3;
+    string end_period = 4;
+    int64 coupon_period = 5;
+    int64 days_from_dist = 6;
+    google.protobuf.DoubleValue coupon_rate = 7;
+    google.protobuf.DoubleValue pay_per_bound = 8;
+    google.protobuf.DoubleValue coupon_val = 9;
+    string stop_trade_date = 10;
+    string pay_date = 11;
+    string coupon_rate_date = 12;
+    string fix_date = 13;
+    int64 update_date = 14;
+    google.protobuf.DoubleValue pay_per_bond_frac = 15;
+}
+
+message BondConvertationRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message BondConvertationResponse {
+    string reqId = 1;
+    repeated BondConvertation bondConvertation = 2;
+}
+
+message SubscribeBondConvertationRequest {
+    int64 update_date = 1;
+}
+
+message BondConvertation {
+    int64 id_fintool = 1;
+    int64 id_fintool_alter = 2;
+    string begconv_date = 3;
+    string endconv_date = 4;
+    google.protobuf.DoubleValue coefficient = 5;
+    int64 update_date = 6;
+}
+
+message BondAmortizationsRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message BondAmortizationsResponse {
+    string reqId = 1;
+    repeated BondCoupons bondCoupons = 2;
+}
+
+message SubscribeBondAmortizationsRequest {
+    int64 update_date = 1;
+}
+
+message BondAmortizations {
+    int64 id_fintool = 1;
+    int64 id_tranche = 2;
+    string mty_date = 3;
+    int64 days_from_dist = 4;
+    google.protobuf.DoubleValue mty_part = 5;
+    google.protobuf.DoubleValue pay_per_bond = 6;
+    google.protobuf.DoubleValue pay_per_market = 7;
+    string mty_type = 8;
+    string rate_date = 9;
+    string fix_date = 10;
+    string pay_date = 11;
+    int64 update_date = 12;
+}
+
+message BondMaturitiesRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message BondMaturitiesResponse {
+    string reqId = 1;
+    repeated BondCoupons bondCoupons = 2;
+}
+
+message SubscribeBondMaturitiesRequest {
+    int64 update_date = 1;
+}
+
+message BondMaturities {
+    int64 fintoolid = 1;
+    string isin = 2;
+    string mty_date = 3;
+    google.protobuf.DoubleValue pay_per_bond = 4;
+    int64 update_date = 5;
+}
+
+message CorporateActionKind {
+    string code = 1;
+    string nameRus = 2;
+    string nameEng = 3;
+    string group = 4;
+    int64 order = 5;
+}
+
+message CorporateActionKindsRequest {
+    string reqId = 1;
+    repeated StringKeys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message CorporateActionKindsResponse {
+    string reqId = 1;
+    repeated CorporateActionKind corporateActionKinds = 2;
+}
+
+message SubscribeCorporateActionKindRequest {
+    int64 update_date = 1;
+}
+
+message CorporateActionSource {
+    string code = 1;
+    string nameRus = 2;
+    string nameEng = 3;
+}
+
+message CorporateActionSourcesRequest {
+    string reqId = 1;
+    repeated StringKeys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message CorporateActionSourcesResponse {
+    string reqId = 1;
+    repeated CorporateActionSource corporateActionSources = 2;
+}
+
+message SubscribeCorporateActionSourceRequest {
+    int64 update_date = 1;
+}
+
+message CorporateActionKindGroups {
+    string code = 1;
+    string name_rus = 2;
+    string name_eng = 3;
+    int64 order_group = 4;
+    int64 update_date = 5;
+}
+
+message CorporateActionKindGroupsRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message CorporateActionKindGroupsResponse {
+    string reqId = 1;
+    repeated CorporateActionKindGroups corporateActionKindGroups = 2;
+}
+
+message SubscribeCorporateActionKindGroupsRequest {
+    int64 update_date = 1;
+}
+
+message CorporateActionActions {
+    int64 msg_id = 1;
+    string act_date = 2;
+    int64 update_date = 3;
+    string msg_type = 4;
+    string act_id = 5;
+    string act_code = 6;
+    int64 fintoolid = 7;
+    string isin = 8;
+    string regcode = 9;
+    string nrdcode = 10;
+    string nickname = 11;
+    int64 fininstid = 12;
+    string issuername = 13;
+    string issuerinn = 14;
+    string issuerogrn = 15;
+    string issuerokpo = 16;
+    string issuerefircode = 17;
+    string issuershortname = 18;
+    string issuersector = 19;
+    string event_effdate = 20;
+    string meeting_date = 21;
+    string meeting_form = 22;
+    string voiting_enddate = 23;
+    string paydate_plan = 24;
+    string event_fixdate = 25;
+    string event_ddlndate = 26;
+    string paydate_fact = 27;
+    string eventper_beg = 28;
+    string eventper_end = 29;
+    string div_source = 30;
+    int32 div_year = 31;
+    string app_perbeg = 32;
+    string app_perend = 33;
+    string cancel_perbeg = 34;
+    string cancel_perend = 35;
+    string payment_perbeg = 36;
+    string payment_perend = 37;
+    google.protobuf.DoubleValue divpay_sumval = 38;
+    google.protobuf.DoubleValue divrecpt_sumval = 39;
+    string price_type = 40;
+    google.protobuf.DoubleValue pay1sec = 41;
+    string currency = 42;
+    google.protobuf.DoubleValue value = 43;
+    google.protobuf.DoubleValue qty_addsec = 44;
+    google.protobuf.DoubleValue qty_exsec = 45;
+    google.protobuf.DoubleValue qty_newsec = 46;
+    string note = 47;
+    string discagencycode = 48;
+    int64 disceventid = 49;
+    int64 disceventtypeid = 50;
+    string disceventtype = 51;
+    string disceventpublishdate = 52;
+    string disceventtext = 53;
+    string dealside1_name = 54;
+    string dealside1_inn = 55;
+    string dealside2_name = 56;
+    string dealside2_inn = 57;
+    string deal_type = 58;
+    string deal_category = 59;
+    google.protobuf.DoubleValue share_before = 60;
+    google.protobuf.DoubleValue share_after = 61;
+    string fio = 62;
+    string position = 63;
+    google.protobuf.DoubleValue shareord_before = 64;
+    google.protobuf.DoubleValue shareord_after = 65;
+}
+
+message CorporateActionActionsRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message CorporateActionActionsResponse {
+    string reqId = 1;
+    repeated CorporateActionActions corporateActionActions = 2;
+}
+
+message SubscribeCorporateActionActionsRequest {
+    int64 update_date = 1;
+}
+
+message ShareDividend {
+    int64 fintoolid = 1;
+    string decision_date = 2;
+    string declared_pay_date = 3;
+    string declared_pay_date_nominee = 4;
+    google.protobuf.DoubleValue declared_sum_dividval = 5;
+    int64 dev_organ = 6;
+    string list_date = 7;
+    string list_dividend_date = 8;
+    string note = 9;
+    string payed = 10;
+    google.protobuf.DoubleValue pay_stock = 11;
+    string period_shortname = 12;
+    string perioddate = 13;
+    string protocol_date = 14;
+    string report_pay_date = 15;
+    google.protobuf.DoubleValue sum_dividval = 16;
+    int64 update_date = 17;
+}
+
+message ShareDividendRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message ShareDividendResponse {
+    string reqId = 1;
+    repeated ShareDividend shareDividends = 2;
+}
+
+message SubscribeShareDividendRequest {
+    int64 update_date = 1;
+}
+
+message InfoCurrencies {
+    string id = 1;
+    string code = 2;
+    int64 iso_number = 3;
+    string name_rus = 4;
+    string fullname_rus = 5;
+    string beg_date = 6;
+    string end_date = 7;
+    int64 updatedate = 8;
+}
+
+message InfoCurrenciesRequest {
+    string reqId = 1;
+    repeated Int64Keys idFilter = 2;
+    int64 update_date = 3;
+    int32 skipCount = 4;
+    int32 pageSize = 5;
+}
+
+message InfoCurrenciesResponse {
+    string reqId = 1;
+    repeated InfoCurrencies infoCurrencies = 2;
+}
+
+message SubscribeInfoCurrenciesRequest {
+    int64 update_date = 1;
+}
+
+service RudataService {
+    rpc GetInfoEmitents(InfoEmitentsRequest) returns (InfoEmitentsResponse);
+    rpc SubscribeEmitents(SubscribeEmitentsRequest) returns (stream Emitent);
+    rpc GetInfoSecurities(InfoSecuritiesRequest) returns (InfoSecuritiesResponse);
+    rpc SubscribeSecurities(SubscribeSecuritiesRequest) returns (stream Security);
+    rpc GetInfoFintoolReferenceData(InfoFintoolReferenceDataRequest) returns (InfoFintoolReferenceDataResponse);
+    rpc SubscribeFintoolReferenceData(SubscribeFintoolReferenceDataRequest) returns (stream FintoolReferenceData);
+    rpc GetBondOffers(BondOffersRequest) returns (BondOffersResponse);
+    rpc SubscribeBondOffers(SubscribeBondOffersRequest) returns (stream BondOffers);
+    rpc GetBondConvertation(BondConvertationRequest) returns (BondConvertationResponse);
+    rpc SubscribeBondConvertation(SubscribeBondConvertationRequest) returns (stream BondConvertation);
+    rpc GetBondCoupons(BondCouponsRequest) returns (BondCouponsResponse);
+    rpc SubscribeBondCoupons(SubscribeBondCouponsRequest) returns (stream BondCoupons);
+    rpc GetBondAmortizations(BondAmortizationsRequest) returns (BondAmortizationsResponse);
+    rpc SubscribeBondAmortizations(SubscribeBondAmortizationsRequest) returns (stream BondAmortizations);
+    rpc GetBondMaturities(BondMaturitiesRequest) returns (BondMaturitiesResponse);
+    rpc SubscribeBondMaturities(SubscribeBondMaturitiesRequest) returns (stream BondMaturities);
+    rpc GetCorporateActionKindGroups(CorporateActionKindGroupsRequest) returns (CorporateActionKindGroupsResponse);
+    rpc SubscribeCorporateActionKindGroups(SubscribeCorporateActionKindGroupsRequest) returns (stream CorporateActionKindGroups);
+    rpc GetCorporateActionKinds(CorporateActionKindsRequest) returns (CorporateActionKindsResponse);
+    rpc SubscribeCorporateActionKinds(SubscribeCorporateActionKindRequest) returns (stream CorporateActionKind);
+    rpc GetCorporateActionSources(CorporateActionSourcesRequest) returns (CorporateActionSourcesResponse);
+    rpc SubscribeCorporateActionSources(SubscribeCorporateActionSourceRequest) returns (stream CorporateActionSource);
+    rpc GetCorporateActionActions(CorporateActionActionsRequest) returns (CorporateActionActionsResponse);
+    rpc SubscribeCorporateActionActions(SubscribeCorporateActionActionsRequest) returns (stream CorporateActionActions);
+    rpc GetShareDividend(ShareDividendRequest) returns (ShareDividendResponse);
+    rpc SubscribeShareDividend(SubscribeShareDividendRequest) returns (stream ShareDividend);
+    rpc GetInfoCurrencies(InfoCurrenciesRequest) returns (InfoCurrenciesResponse);
+    rpc SubscribeInfoCurrencies(SubscribeInfoCurrenciesRequest) returns (stream InfoCurrencies);
+}

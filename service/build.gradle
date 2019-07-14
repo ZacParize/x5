@@ -1,0 +1,102 @@
+archivesBaseName = 'bm-catalog-of-instruments-rudata'
+group = parent.group
+version = parent.version
+
+apply plugin: 'org.springframework.boot'
+
+springBoot {
+    mainClassName = "${servicePackage}.ServiceApplication"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "com.bcs.bm.common:bm-dependencies:$ver.bmDependencies"
+    }
+    resolutionStrategy {
+        cacheDynamicVersionsFor 5, 'minutes'
+        cacheChangingModulesFor 0, 'minutes'
+    }
+}
+
+dependencies {
+
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor",
+                "org.projectlombok:lombok"
+
+    compile project((parent.parent != null ? ":" + parent.name : "") + ":client"),
+            "com.bcs.bm.common:bm-utils",
+            "org.apache.commons:commons-lang3",
+            "com.google.guava:guava",
+            "ch.qos.logback:logback-classic",
+            "org.fluentd:fluent-logger",
+            "com.sndyuk:logback-more-appenders",
+            "org.flywaydb:flyway-core",
+            "com.fasterxml.jackson.dataformat:jackson-dataformat-xml",
+            "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+            "org.springframework.data:spring-data-mongodb",
+            "com.google.api.grpc:proto-google-common-protos",
+            "com.google.protobuf:protoc",
+            "com.google.protobuf:protobuf-java",
+            "io.netty:netty-all"
+
+    compile "io.grpc:grpc-all",
+            "io.grpc:grpc-stub",
+            "io.grpc:grpc-netty",
+            "io.grpc:grpc-protobuf"
+
+    compile "org.reactivestreams:reactive-streams"
+
+    compile "org.springframework.boot:spring-boot-starter-undertow",
+            "org.springframework.boot:spring-boot-starter-actuator",
+            "org.springframework.boot:spring-boot-starter-data-rest",
+            "org.springframework.boot:spring-boot-starter-data-mongodb",
+            "org.springframework.boot:spring-boot-starter-web",
+            "org.springframework.boot:spring-boot-starter-aop",
+            "org.springframework.boot:spring-boot-starter-parent"
+
+    compile "org.springframework.cloud:spring-cloud-starter-config",
+            "org.springframework.cloud:spring-cloud-starter-netflix-hystrix",
+            "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+
+    compile "org.hibernate:hibernate-validator",
+            "org.hibernate:hibernate-core",
+            "org.hibernate:hibernate-entitymanager",
+            "org.hibernate:hibernate-hikaricp",
+            "com.jayway.jsonpath:json-path"
+
+    compile "org.springframework.cloud:spring-cloud-netflix-core",
+            "com.netflix.hystrix:hystrix-javanica",
+            "com.netflix.archaius:archaius-core"
+
+    testCompile "com.bcs.bm.common:bm-test",
+            "org.springframework.boot:spring-boot-starter-test",
+            "org.springframework.cloud:spring-cloud-stream-test-support",
+            "org.junit.jupiter:junit-jupiter-api",
+            "org.junit.jupiter:junit-jupiter-params",
+            "org.junit.vintage:junit-vintage-engine",
+            "org.testcontainers:testcontainers:1.10.1"
+
+    testCompileOnly "org.projectlombok:lombok"
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+}
+
+configurations.all {
+    all*.exclude group: 'com.vaadin.external.google'
+    all*.exclude group: "commons-logging", module: "commons-logging"
+    all*.exclude group: "log4j"
+    all*.exclude group: "org.apache.logging.log4j"
+    all*.exclude group: "org.slf4j", module: "slf4j-log4j12"
+    all*.exclude group: "org.slf4j", module: "slf4j-simple"
+    all*.exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+}
+
+//allow to put resources next to java code
+sourceSets {
+    test {
+        resources {
+            srcDirs += test.java.srcDirs
+            exclude '**/*.java'
+        }
+    }
+}
